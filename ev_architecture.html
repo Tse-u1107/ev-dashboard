@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV Range Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --ink:    #1a1a2e;
+  --paper:  #f4f0e8;
+  --cream:  #ede8dc;
+  --rule:   #c8bfa8;
+  --red:    #c0392b;
+  --blue:   #1a4a8a;
+  --green:  #1a6640;
+  --amber:  #a05c00;
+  --violet: #5a2d8a;
+  --mono:   'Courier Prime', monospace;
+  --serif:  'Fraunces', serif;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  min-height: 100vh;
+  padding: 0 0 80px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ─── */
+.page-header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 48px 40px 36px;
+  border-bottom: 4px solid var(--red);
+}
+
+.header-eyebrow {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 900;
+  line-height: 1.0;
+  margin-bottom: 10px;
+}
+
+h1 em { color: #e8d090; font-style: italic; }
+
+.header-sub {
+  font-size: 13px;
+  color: #aaa;
+  max-width: 800px;
+  line-height: 1.7;
+  margin-top: 8px;
+}
+
+.parnas-ref {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 11px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 6px 14px;
+  letter-spacing: 1px;
+}
+
+/* ── NAV ─── */
+.toc {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.toc-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  color: #888;
+}
+
+.toc-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.toc-list a {
+  display: block;
+  padding: 6px 12px;
+  background: var(--cream);
+  border-left: 3px solid var(--ink);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12px;
+  transition: all .2s;
+}
+
+.toc-list a:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ── MAIN ─── */
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* ── PRINCIPLE BOX ─── */
+.principle-box {
+  border: 2px solid var(--ink);
+  padding: 20px 24px;
+  margin-bottom: 40px;
+  position: relative;
+  background: var(--cream);
+}
+
+.principle-box::before {
+  content: 'PARNAS PRINCIPLE';
+  position: absolute;
+  top: -11px; left: 20px;
+  background: var(--cream);
+  padding: 0 8px;
+  font-size: 10px;
+  letter-spacing: 3px;
+  font-weight: 700;
+}
+
+.principle-box p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.principle-box strong { color: var(--red); }
+
+
+/* ── SECTION TITLE ─── */
+.section-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 700;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 10px;
+  margin: 48px 0 32px;
+  scroll-margin-top: 20px;
+}
+
+.section-title:first-child { margin-top: 0; }
+
+.section-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-weight: 400;
+}
+
+/* ── MODULE SPEC CARD ─── */
+.spec-card {
+  border: 2px solid var(--ink);
+  margin-bottom: 40px;
+  overflow: hidden;
+  scroll-margin-top: 20px;
+}
+
+.spec-header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.spec-num {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 900;
+  font-style: italic;
+  width: 50px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.spec-name-block {
+  flex: 1;
+}
+
+.spec-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #aaa;
+}
+
+.spec-name {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.spec-body {
+  padding: 24px 28px;
+  background: #fafaf8;
+}
+
+.spec-section {
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.spec-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.spec-section-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.spec-section-body {
+  font-size: 12px;
+  line-height: 2;
+  color: #333;
+}
+
+.spec-section-body p {
+  margin-bottom: 10px;
+}
+
+.spec-section-body p:last-child {
+  margin-bottom: 0;
+}
+
+.fn-block {
+  background: rgba(0,0,0,0.03);
+  border-left: 3px solid var(--blue);
+  padding: 12px 16px;
+  margin: 10px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.fn-name { color: var(--blue); font-weight: 700; }
+.fn-kw   { color: var(--red); }
+.fn-val  { color: var(--green); }
+.fn-comment { color: #888; font-style: italic; display: block; margin-top: 4px; }
+
+.param-list {
+  margin: 8px 0 8px 20px;
+}
+
+.param-list li {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #555;
+}
+
+/* ── ML MODEL SECTION ─── */
+.ml-architecture {
+  background: linear-gradient(135deg, #f0f4ff, #fff8f0);
+  border: 3px solid var(--blue);
+  padding: 32px;
+  margin-bottom: 40px;
+}
+
+.ml-title {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+
+.ml-subtitle {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.ml-block {
+  background: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.ml-block:last-child { margin-bottom: 0; }
+
+.ml-block-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--blue);
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.ml-block-body {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #333;
+}
+
+.ml-block-body p { margin-bottom: 10px; }
+.ml-block-body p:last-child { margin-bottom: 0; }
+
+.ml-block-body strong { color: var(--blue); }
+.ml-block-body code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--red);
+}
+
+.ml-block-body ul {
+  margin: 10px 0 10px 20px;
+}
+
+.ml-block-body li {
+  margin-bottom: 6px;
+  line-height: 1.7;
+}
+
+.formula-box {
+  background: #f9f9f9;
+  border-left: 4px solid var(--amber);
+  padding: 16px;
+  margin: 16px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 2;
+}
+
+.formula-box .var { color: var(--amber); font-weight: 700; }
+.formula-box .op  { color: #666; }
+
+/* ── TRAINING PIPELINE ─── */
+.training-pipeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 16px 0;
+  margin: 16px 0;
+}
+
+.pipeline-step {
+  min-width: 180px;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 16px;
+  text-align: center;
+  position: relative;
+}
+
+.pipeline-step + .pipeline-step {
+  margin-left: 20px;
+}
+
+.pipeline-arrow {
+  color: var(--blue);
+  font-size: 20px;
+  margin: 0 -10px;
+  z-index: 1;
+}
+
+.pipeline-num {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: white;
+  line-height: 28px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.pipeline-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.pipeline-detail {
+  font-size: 10px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* ── DATA TABLE ─── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 11px;
+}
+
+.data-table th {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.data-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+.data-table tr:nth-child(even) td {
+  background: var(--cream);
+}
+
+.data-table code {
+  background: rgba(0,0,0,0.05);
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-size: 10px;
+}
+
+/* ── FOOTER ─── */
+.footer {
+  text-align: center;
+  padding: 24px;
+  border-top: 2px solid var(--ink);
+  font-size: 11px;
+  color: #888;
+  letter-spacing: 1px;
+  margin-top: 40px;
+}
+
+/* animations */
+.spec-card { animation: slideUp .4s ease backwards; }
+.spec-card:nth-child(1){animation-delay:.05s} .spec-card:nth-child(2){animation-delay:.10s}
+.spec-card:nth-child(3){animation-delay:.15s} .spec-card:nth-child(4){animation-delay:.20s}
+.spec-card:nth-child(5){animation-delay:.25s} .spec-card:nth-child(6){animation-delay:.30s}
+.spec-card:nth-child(7){animation-delay:.35s} .spec-card:nth-child(8){animation-delay:.40s}
+
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-eyebrow">Human Computer Interactions · Final Project</div>
+  <h1>EV Range Predictor</h1>
+  <p class="header-sub">
+    Architecture designed according to Parnas (1972): each module hides one design decision that is difficult or likely to change. Modules communicate only through abstract interfaces — never through shared internal representations.
+  </p>
+  <div class="parnas-ref">
+    Based on: D.L. Parnas — "On the Criteria To Be Used in Decomposing Systems into Modules" (1972)
+    &nbsp;+&nbsp; "A Technique for Software Module Specification with Examples" (1972)
+  </div>
+</div>
+
+<nav class="toc">
+  <!-- PRINCIPLE -->
+  <div class="principle-box">
+    <p>
+      Parnas argues that the wrong way to decompose a system is to follow the <strong>flowchart of execution</strong>
+      (Input → Process → Output). The right way is to begin with a list of <strong>difficult design decisions that are likely to change</strong>,
+      then assign each decision to exactly one module which <strong>hides it from all other modules</strong>.
+      Every other module interacts with it only through a clean abstract interface.
+      Applied to the EV app: decisions like "how do we store battery cell data?", "which weather API do we use?",
+      or "how do we calculate range?" are each hidden inside their own module.
+    </p>
+  </div>
+
+  <div class="toc-title">// Jump to Module</div>
+  <ul class="toc-list">
+    <li><a href="#m1">M1 · Battery State</a></li>
+    <li><a href="#m2">M2 · Weather</a></li>
+    <li><a href="#m3">M3 · Route Topology</a></li>
+    <li><a href="#m4">M4 · Energy Consumption</a></li>
+    <li><a href="#m5">M5 · Driver Behaviour</a></li>
+    <li><a href="#m6">M6 · Range Prediction</a></li>
+    <li><a href="#m7">M7 · Charging Stations</a></li>
+    <li><a href="#m8">M8 · User Interface</a></li>
+    <li><a href="#ml">ML Model Architecture</a></li>
+  </ul>
+</nav>
+
+<div class="main">
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MODULE 1: BATTERY STATE
+═════════════════════════════════════════════════════════════════ -->
+<div class="spec-card" id="m1">
+  <div class="spec-header">
+    <div class="spec-num">1</div>
+    <div class="spec-name-block">
+      <div class="spec-label">Module 1 — Data Storage</div>
+      <div class="spec-name">Battery State Module</div>
+    </div>
+  </div>
+  <div class="spec-body">
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Hidden Design Decision</div>
+      <div class="spec-section-body">
+        <p>How battery cell data is stored and structured internally. Whether data comes from CAN bus, OBD-II, Bluetooth, or simulated placeholders. Whether State of Health (SoH) is computed from cycle count, impedance spectroscopy, or manufacturer lookup tables.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Parameters (pl, p2, p3)</div>
+      <div class="spec-section-body">
+        <p><strong>pl</strong> = Maximum number of battery cells (default: 4416 for Tesla Model 3)<br>
+        <strong>p2</strong> = Maximum voltage per cell in mV (default: 4200)<br>
+        <strong>p3</strong> = Temperature sensor count (default: 16)</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Function Specifications</div>
+      <div class="spec-section-body">
+
+        <div class="fn-block">
+          <span class="fn-name">Function getSoC()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.0 – 1.0]</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> call ERR_NO_SENSOR if BMS connection unavailable<br>
+          <span class="fn-comment">// Returns State of Charge as a fraction. 0.0 = empty, 1.0 = full.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getSoH()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.0 – 1.0]</span><br>
+          <span class="fn-kw">initial value:</span> 1.0 (assume new battery)<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// Returns State of Health as a fraction. 1.0 = new, 0.8 = 80% of original capacity.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getCellVoltageDelta()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.0 – 500.0] in millivolts</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> call ERR_NO_SENSOR if unavailable<br>
+          returns max(cell_voltages) − min(cell_voltages)<br>
+          <span class="fn-comment">// CRITICAL for detecting weak cells. High delta (>100mV) = risk of sudden shutdown.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getThermalState()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [−40.0 – 60.0] in °C</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> call ERR_NO_SENSOR if unavailable<br>
+          returns average battery pack temperature<br>
+          <span class="fn-comment">// Used to compute thermal derating. Cold batteries (<0°C) have significantly reduced capacity.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getCycleCount()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">integer [0 – 5000]</span><br>
+          <span class="fn-kw">initial value:</span> 0<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// Total charge/discharge cycles. Used to estimate degradation.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getUsableEnergy()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.0 – 100.0] in kWh</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> call ERR_NO_SENSOR if unavailable<br>
+          returns <span class="fn-val">getSoC() × getSoH() × nominal_capacity × thermal_derating(getThermalState())</span><br>
+          <span class="fn-comment">// Mapping function. Final usable energy accounting for all degradation factors.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MODULE 2: WEATHER
+═════════════════════════════════════════════════════════════════ -->
+<div class="spec-card" id="m2">
+  <div class="spec-header">
+    <div class="spec-num">2</div>
+    <div class="spec-name-block">
+      <div class="spec-label">Module 2 — External Data</div>
+      <div class="spec-name">Weather Module</div>
+    </div>
+  </div>
+  <div class="spec-body">
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Hidden Design Decision</div>
+      <div class="spec-section-body">
+        <p>Which weather API is used (OpenWeatherMap, Tomorrow.io, NOAA, etc.). How API keys are managed. How data is cached. The JSON parsing logic. Fallback behavior when API is offline.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Function Specifications</div>
+      <div class="spec-section-body">
+
+        <div class="fn-block">
+          <span class="fn-name">Function getAmbientTemp(lat, lng)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [−50.0 – 50.0] in °C</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> lat (float), lng (float)<br>
+          <span class="fn-kw">effect:</span> call ERR_NETWORK if API unreachable<br>
+          call ERR_INVALID_COORD if lat/lng out of bounds<br>
+          <span class="fn-comment">// Returns current temperature at given location. May use cached value if recent.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getWindVector(lat, lng)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">{speed: float [0–50] m/s, bearing: float [0–360]}</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> lat (float), lng (float)<br>
+          <span class="fn-kw">effect:</span> call ERR_NETWORK if unavailable<br>
+          <span class="fn-comment">// Wind affects aerodynamic drag. Headwind increases consumption significantly.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getPrecipitation(lat, lng)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.0 – 100.0] in mm/h</span><br>
+          <span class="fn-kw">initial value:</span> 0.0<br>
+          <span class="fn-kw">parameters:</span> lat (float), lng (float)<br>
+          <span class="fn-kw">effect:</span> call ERR_NETWORK if unavailable<br>
+          <span class="fn-comment">// Rain/snow increases rolling resistance and may trigger heating usage.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getForecastAlongRoute(waypoints)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">WeatherProfile[] — array of {lat, lng, temp, wind, precip}</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> waypoints (array of {lat, lng, eta})<br>
+          <span class="fn-kw">effect:</span> call ERR_NETWORK if unavailable<br>
+          returns forecast at each waypoint based on ETA<br>
+          <span class="fn-comment">// Queries forecast API for conditions at each future location/time point.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MODULE 3: ROUTE TOPOLOGY
+═════════════════════════════════════════════════════════════════ -->
+<div class="spec-card" id="m3">
+  <div class="spec-header">
+    <div class="spec-num">3</div>
+    <div class="spec-name-block">
+      <div class="spec-label">Module 3 — Geometry</div>
+      <div class="spec-name">Route Topology Module</div>
+    </div>
+  </div>
+  <div class="spec-body">
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Hidden Design Decision</div>
+      <div class="spec-section-body">
+        <p>How elevation data is sourced (Google Elevation API, SRTM tiles, cached data). How road segments are divided. The algorithm for computing gradient. Whether to use polynomial interpolation or step functions.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Function Specifications</div>
+      <div class="spec-section-body">
+
+        <div class="fn-block">
+          <span class="fn-name">Function getGradientProfile(route)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">Segment[] where Segment = {start_lat, start_lng, end_lat, end_lng, gradient_deg, distance_m}</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> route (array of {lat, lng})<br>
+          <span class="fn-kw">effect:</span> call ERR_NETWORK if elevation API unavailable<br>
+          divides route into segments with approximately constant gradient<br>
+          <span class="fn-comment">// Each segment has elevation rise/run computed as gradient in degrees.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getSegmentSlope(segmentID)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [−30.0 – 30.0] in degrees</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> segmentID (string)<br>
+          <span class="fn-kw">effect:</span> call ERR_NO_SEGMENT if ID not found<br>
+          <span class="fn-comment">// Returns slope. Positive = uphill (energy cost), negative = downhill (regen opportunity).</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getRoadSurface(segmentID)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">enum {HIGHWAY, URBAN, RURAL, UNPAVED}</span><br>
+          <span class="fn-kw">initial value:</span> HIGHWAY (default assumption)<br>
+          <span class="fn-kw">parameters:</span> segmentID (string)<br>
+          <span class="fn-kw">effect:</span> call ERR_NO_SEGMENT if ID not found<br>
+          <span class="fn-comment">// Road type affects rolling resistance coefficient Crr.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getRegenOpportunities(route)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">Segment[] (subset of gradient profile where slope < −2°)</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> route (array of {lat, lng})<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// Mapping function. Identifies downhill segments where regenerative braking can recover energy.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MODULE 4: ENERGY CONSUMPTION MODEL
+═════════════════════════════════════════════════════════════════ -->
+<div class="spec-card" id="m4">
+  <div class="spec-header">
+    <div class="spec-num">4</div>
+    <div class="spec-name-block">
+      <div class="spec-label">Module 4 — Physics Baseline</div>
+      <div class="spec-name">Energy Consumption Model</div>
+    </div>
+  </div>
+  <div class="spec-body">
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Hidden Design Decision</div>
+      <div class="spec-section-body">
+        <p>The exact physics formula used. Vehicle-specific constants (drag coefficient Cd, frontal area A, rolling resistance Crr, motor efficiency curve). Whether placeholders or real research data is used. The thermal derating function for cold batteries.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Physics Model (Hidden Implementation)</div>
+      <div class="spec-section-body">
+        <div class="formula-box">
+          <span class="var">E_consumption</span> <span class="op">=</span> <span class="var">F_drag</span> <span class="op">+</span> <span class="var">F_roll</span> <span class="op">+</span> <span class="var">F_slope</span> <span class="op">+</span> <span class="var">P_HVAC</span><br><br>
+          where:<br>
+          <span class="var">F_drag</span> <span class="op">= ½ρC<sub>d</sub>Av²</span> <span class="op">÷ η<sub>motor</sub></span> &nbsp; <span class="op">(aerodynamic drag)</span><br>
+          <span class="var">F_roll</span> <span class="op">= C<sub>rr</sub>mg</span> &nbsp; <span class="op">(rolling resistance)</span><br>
+          <span class="var">F_slope</span> <span class="op">= mg·sin(θ)</span> &nbsp; <span class="op">(gravitational potential energy)</span><br>
+          <span class="var">P_HVAC</span> <span class="op">= k(T<sub>cabin</sub> − T<sub>ambient</sub>)</span> &nbsp; <span class="op">(heating/cooling power)</span><br><br>
+          Constants (Tesla Model 3 example):<br>
+          C<sub>d</sub> = 0.23, A = 2.22 m², C<sub>rr</sub> = 0.011, η<sub>motor</sub> = 0.92, ρ = 1.225 kg/m³
+        </div>
+        <p><strong>Note:</strong> These constants are hidden inside this module. Other modules never see them.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Function Specifications</div>
+      <div class="spec-section-body">
+
+        <div class="fn-block">
+          <span class="fn-name">Function computeConsumption(v, slope, mass, temp, wind)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [50.0 – 500.0] in Wh/km</span><br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span><br>
+          &nbsp;&nbsp;v (float) — speed in km/h<br>
+          &nbsp;&nbsp;slope (float) — gradient in degrees<br>
+          &nbsp;&nbsp;mass (float) — total vehicle + cargo mass in kg<br>
+          &nbsp;&nbsp;temp (float) — ambient temperature in °C<br>
+          &nbsp;&nbsp;wind (float) — headwind component in m/s<br>
+          <span class="fn-kw">effect:</span> none<br>
+          returns energy consumption per km using physics model<br>
+          <span class="fn-comment">// Core physics calculation. All complexity is hidden here.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function computeHVACLoad(cabinTemp, ambientTemp)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.0 – 5000.0] in W</span><br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> cabinTemp (float), ambientTemp (float), both in °C<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// Heating uses ~3-5kW in extreme cold. Air conditioning uses ~1-2kW.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function computeRegenRecovery(slope, speed)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.0 – 150.0] in Wh/km (negative consumption)</span><br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> slope (float) in degrees, speed (float) in km/h<br>
+          <span class="fn-kw">effect:</span> none<br>
+          returns energy recovered per km on downhill segments<br>
+          <span class="fn-comment">// Assumes ~70% regen efficiency. Max recovery limited by motor power rating.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function setVehicleProfile(make, model, year)</span><br>
+          <span class="fn-kw">possible values:</span> none<br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> make, model, year (all strings)<br>
+          <span class="fn-kw">effect:</span> call ERR_UNKNOWN_VEHICLE if profile not found<br>
+          updates internal constants (Cd, A, Crr, mass) for specified vehicle<br>
+          <span class="fn-comment">// Allows supporting multiple car models with different aerodynamics.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MODULE 5: DRIVER BEHAVIOUR
+═════════════════════════════════════════════════════════════════ -->
+<div class="spec-card" id="m5">
+  <div class="spec-header">
+    <div class="spec-num">5</div>
+    <div class="spec-name-block">
+      <div class="spec-label">Module 5 — Machine Learning</div>
+      <div class="spec-name">Driver Behaviour Module</div>
+    </div>
+  </div>
+  <div class="spec-body">
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Hidden Design Decision</div>
+      <div class="spec-section-body">
+        <p>How driver style is measured and quantified. What data is logged (accelerometer, GPS speed deltas, HVAC usage patterns). How ML model is trained. Whether data is stored locally or anonymised for cloud sync. GDPR compliance strategy.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Function Specifications</div>
+      <div class="spec-section-body">
+
+        <div class="fn-block">
+          <span class="fn-name">Function getAggressionCoeff()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.5 – 2.0]</span><br>
+          <span class="fn-kw">initial value:</span> 1.0 (neutral driver)<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// Multiplier on energy consumption. 0.5 = eco driver, 2.0 = aggressive. Learned from trip history.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getHVACUsageCoeff()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [0.0 – 1.0]</span><br>
+          <span class="fn-kw">initial value:</span> 0.5 (moderate usage)<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// 0.0 = never uses HVAC, 1.0 = always maximises comfort. Learned from past trips.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getAvgHighwaySpeed()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">float [80.0 – 140.0] in km/h</span><br>
+          <span class="fn-kw">initial value:</span> 110.0 (typical highway speed)<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// Historical average. Used to predict highway consumption (drag increases with v²).</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function updateFromTrip(tripLog)</span><br>
+          <span class="fn-kw">possible values:</span> none<br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> tripLog (struct containing: distance, energy_used, avg_speed, HVAC_usage, accel_events)<br>
+          <span class="fn-kw">effect:</span> retrains internal ML model using new data point<br>
+          updates getAggressionCoeff(), getHVACUsageCoeff(), getAvgHighwaySpeed()<br>
+          <span class="fn-comment">// Self-learning feedback loop. Called after each trip. GDPR: all data stays on-device.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function resetProfile()</span><br>
+          <span class="fn-kw">possible values:</span> none<br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> resets all coefficients to initial values<br>
+          deletes all stored trip history<br>
+          <span class="fn-comment">// Allows user to clear personal data for privacy / when switching drivers.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MODULE 6: RANGE PREDICTION COORDINATOR
+═════════════════════════════════════════════════════════════════ -->
+<div class="spec-card" id="m6">
+  <div class="spec-header">
+    <div class="spec-num">6</div>
+    <div class="spec-name-block">
+      <div class="spec-label">Module 6 — Core Engine</div>
+      <div class="spec-name">Range Prediction Coordinator</div>
+    </div>
+  </div>
+  <div class="spec-body">
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Hidden Design Decision</div>
+      <div class="spec-section-body">
+        <p>How inputs from all other modules are combined. Whether prediction uses pure physics, ML correction, Monte Carlo simulation, or weighted average. How confidence intervals are derived. The self-learning feedback loop logic.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Function Specifications</div>
+      <div class="spec-section-body">
+
+        <div class="fn-block">
+          <span class="fn-name">Function predictRange(route, cargo_kg)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">RangeEstimate {mean_km, confidence_low, confidence_high, risk_segments}</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span><br>
+          &nbsp;&nbsp;route (array of {lat, lng})<br>
+          &nbsp;&nbsp;cargo_kg (float) — additional mass beyond vehicle curb weight<br>
+          <span class="fn-kw">effect:</span> calls M1.getUsableEnergy(), M2.getForecastAlongRoute(), M3.getGradientProfile(),<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M4.computeConsumption(), M5.getAggressionCoeff(), M5.getHVACUsageCoeff()<br>
+          <span class="fn-comment">// Master orchestration function. Combines all inputs into final prediction.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getRangeConfidenceInterval()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">{low: float, high: float} in km</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// Returns 90% confidence interval from last predictRange() call. Wider interval = more uncertainty.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function detectCellImbalanceRisk()</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">enum {NONE, LOW, MEDIUM, HIGH, CRITICAL}</span><br>
+          <span class="fn-kw">initial value:</span> NONE<br>
+          <span class="fn-kw">parameters:</span> none<br>
+          <span class="fn-kw">effect:</span> calls M1.getCellVoltageDelta(), M1.getThermalState()<br>
+          <span class="fn-comment">// Solves the "72km Tesla problem". Returns CRITICAL if delta >120mV and temp <0°C (shutdown risk).</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function recordTripOutcome(predicted_km, actual_km, actual_consumption)</span><br>
+          <span class="fn-kw">possible values:</span> none<br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> predicted_km, actual_km (floats), actual_consumption (float in kWh)<br>
+          <span class="fn-kw">effect:</span> computes prediction error, retrains internal XGBoost model, calls M5.updateFromTrip()<br>
+          <span class="fn-comment">// Self-learning loop. "The model will know if it failed." Adjusts future predictions based on error.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MODULE 7: CHARGING STATIONS
+═════════════════════════════════════════════════════════════════ -->
+<div class="spec-card" id="m7">
+  <div class="spec-header">
+    <div class="spec-num">7</div>
+    <div class="spec-name-block">
+      <div class="spec-label">Module 7 — External Network</div>
+      <div class="spec-name">Charging Station Module</div>
+    </div>
+  </div>
+  <div class="spec-body">
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Hidden Design Decision</div>
+      <div class="spec-section-body">
+        <p>Which charger APIs are used (Open Charge Map, Tesla Supercharger API, OCPP). How availability is estimated. Whether queue wait time is predicted from historical data or live polling. Partial vs. real-time data handling.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Function Specifications</div>
+      <div class="spec-section-body">
+
+        <div class="fn-block">
+          <span class="fn-name">Function getNearbyChargers(location, radius_km)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">Charger[] where Charger = {id, name, lat, lng, power_kW, connector_type, price}</span><br>
+          <span class="fn-kw">initial value:</span> undefined<br>
+          <span class="fn-kw">parameters:</span> location ({lat, lng}), radius_km (float)<br>
+          <span class="fn-kw">effect:</span> call ERR_NETWORK if API unavailable<br>
+          <span class="fn-comment">// Returns all chargers within radius. May use cached data if API down.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getAvailability(chargerID)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">enum {AVAILABLE, OCCUPIED, OUT_OF_SERVICE, UNKNOWN}</span><br>
+          <span class="fn-kw">initial value:</span> UNKNOWN<br>
+          <span class="fn-kw">parameters:</span> chargerID (string)<br>
+          <span class="fn-kw">effect:</span> call ERR_NETWORK if unavailable<br>
+          <span class="fn-comment">// Real-time availability. Lecture slide says "some known" — may return UNKNOWN for chargers without live data.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function getEstimatedWait(chargerID, arrival_time)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">integer [0 – 180] in minutes</span><br>
+          <span class="fn-kw">initial value:</span> 0 (assume no wait)<br>
+          <span class="fn-kw">parameters:</span> chargerID (string), arrival_time (datetime)<br>
+          <span class="fn-kw">effect:</span> none<br>
+          <span class="fn-comment">// Predicted wait time based on historical occupancy patterns at that time/day.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function isReachable(chargerID, current_range_km)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">boolean</span><br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> chargerID (string), current_range_km (float)<br>
+          <span class="fn-kw">effect:</span> calls M6.predictRange() to compute energy needed to reach charger<br>
+          <span class="fn-comment">// Returns true if charger is within predicted range with safety margin.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MODULE 8: USER INTERFACE
+═════════════════════════════════════════════════════════════════ -->
+<div class="spec-card" id="m8">
+  <div class="spec-header">
+    <div class="spec-num">8</div>
+    <div class="spec-name-block">
+      <div class="spec-label">Module 8 — Presentation</div>
+      <div class="spec-name">User Interface Module</div>
+    </div>
+  </div>
+  <div class="spec-body">
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Hidden Design Decision</div>
+      <div class="spec-section-body">
+        <p>Whether UI is iOS (SwiftUI), Android (Jetpack Compose), or cross-platform (React Native). Visual design, colour scheme, animation logic. Notification strategy. Whether app runs on phone, car head unit, or both.</p>
+      </div>
+    </div>
+
+    <div class="spec-section">
+      <div class="spec-section-title">// Function Specifications</div>
+      <div class="spec-section-body">
+
+        <div class="fn-block">
+          <span class="fn-name">Function displayRangeEstimate(estimate)</span><br>
+          <span class="fn-kw">possible values:</span> none<br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> estimate (RangeEstimate from M6.predictRange())<br>
+          <span class="fn-kw">effect:</span> updates on-screen display with range and confidence interval<br>
+          colour shifts green→amber→red based on risk level<br>
+          <span class="fn-comment">// Never shows just "280 km". Shows "280 km ± 18 km (95% confident)" with visual cues.</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function showChargerRoute(chargers, route)</span><br>
+          <span class="fn-kw">possible values:</span> none<br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> chargers (Charger[]), route (array of {lat, lng})<br>
+          <span class="fn-kw">effect:</span> displays map with route and charger markers<br>
+          automatically inserts charging stop if range insufficient<br>
+          <span class="fn-comment">// Smart insertion: "You need to charge at Tuen Mun Shell in 11 min to reach destination."</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function triggerWarning(type, message)</span><br>
+          <span class="fn-kw">possible values:</span> none<br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> type (enum {INFO, WARNING, CRITICAL}), message (string)<br>
+          <span class="fn-kw">effect:</span> displays notification / alert based on severity<br>
+          CRITICAL = full-screen takeover + haptic feedback<br>
+          <span class="fn-comment">// Actionable warnings. "Cell #7 voltage delta 120mV — risk of shutdown. Charge now."</span>
+        </div>
+
+        <div class="fn-block">
+          <span class="fn-name">Function requestUserInput(field)</span><br>
+          <span class="fn-kw">possible values:</span> <span class="fn-val">UserInput {cargo_kg, passenger_count, HVAC_setting, destination}</span><br>
+          <span class="fn-kw">initial value:</span> not applicable<br>
+          <span class="fn-kw">parameters:</span> field (enum specifying which input is needed)<br>
+          <span class="fn-kw">effect:</span> displays input UI, blocks until user provides value<br>
+          <span class="fn-comment">// Collects the 7 input variables from lecture slide (load, driver preferences, etc.).</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     ML MODEL ARCHITECTURE & TRAINING
+═════════════════════════════════════════════════════════════════ -->
+<h2 class="section-title" id="ml">Machine Learning Model Architecture</h2>
+<div class="section-subtitle">Exact model specification, training methodology, and self-learning feedback loop</div>
+
+<div class="ml-architecture">
+  <div class="ml-title">Hybrid Physics + ML Correction Architecture</div>
+  <div class="ml-subtitle">Two-stage prediction: physics baseline (deterministic) → ML error correction (learned)</div>
+
+  <div class="ml-block">
+    <div class="ml-block-title">Stage 1: Physics Baseline Model (Deterministic)</div>
+    <div class="ml-block-body">
+      <p><strong>Purpose:</strong> Provide a reliable starting estimate using known aerodynamic and thermodynamic principles.</p>
+      
+      <div class="formula-box">
+        <span class="var">Range_physics</span> <span class="op">= E_usable ÷ E_consumption_per_km</span><br><br>
+        where:<br>
+        <span class="var">E_usable</span> <span class="op">= SoC × SoH × capacity_kWh × thermal_derating(T_battery)</span><br>
+        <span class="var">E_consumption_per_km</span> <span class="op">= (½ρC<sub>d</sub>Av² + C<sub>rr</sub>mg + mg·sin(θ)) ÷ 1000 + P_HVAC/v</span>
+      </div>
+
+      <p><strong>Inputs:</strong></p>
+      <ul>
+        <li>From M1 (Battery): SoC, SoH, thermal state</li>
+        <li>From M2 (Weather): ambient temp, wind vector</li>
+        <li>From M3 (Topology): gradient profile θ(x)</li>
+        <li>From User: cargo mass, passenger count</li>
+      </ul>
+
+      <p><strong>Constants (vehicle-specific):</strong> Cd = 0.23, A = 2.22 m², Crr = 0.011, m_vehicle = 1847 kg, capacity = 75 kWh (Tesla Model 3 Long Range)</p>
+
+      <p><strong>Why physics first?</strong> It works on day 1 with zero training data. It's interpretable. It handles edge cases (extreme cold, very heavy loads) better than pure ML.</p>
+    </div>
+  </div>
+
+  <div class="ml-block">
+    <div class="ml-block-title">Stage 2: ML Error Correction Layer (XGBoost Regressor)</div>
+    <div class="ml-block-body">
+      <p><strong>Model Type:</strong> XGBoost (Gradient Boosted Decision Trees)</p>
+      
+      <p><strong>Why XGBoost?</strong></p>
+      <ul>
+        <li>Handles non-linear interactions between features (e.g., cold + highway speed + aggressive driving)</li>
+        <li>Works well with small training datasets (important for on-device learning)</li>
+        <li>Fast inference (~5ms on mobile hardware)</li>
+        <li>Naturally produces confidence intervals via quantile regression</li>
+        <li>Can run entirely on-device (no server needed)</li>
+      </ul>
+
+      <p><strong>Architecture:</strong></p>
+      <ul>
+        <li>Number of trees: 50 (lightweight for mobile)</li>
+        <li>Max depth: 5</li>
+        <li>Learning rate: 0.1</li>
+        <li>Objective: <code>reg:squarederror</code> (predict residual error)</li>
+        <li>Model size: ~200 KB (fits in phone memory easily)</li>
+      </ul>
+
+      <p><strong>What it learns:</strong> The <em>residual error</em> between physics prediction and actual outcome.</p>
+
+      <div class="formula-box">
+        <span class="var">ε</span> <span class="op">= Range_actual − Range_physics</span><br>
+        <span class="var">Range_final</span> <span class="op">= Range_physics + XGBoost(features)</span>
+      </div>
+
+      <p>The XGBoost model learns patterns like: "physics underestimates by 8% when temp <0°C and driver_aggression >1.5" or "physics overestimates by 12% on urban routes with frequent stops".</p>
+    </div>
+  </div>
+
+  <div class="ml-block">
+    <div class="ml-block-title">Feature Engineering (Input to XGBoost)</div>
+    <div class="ml-block-body">
+      <p>The ML model receives 18 features derived from the 7 lecture variables + context:</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Source Module</th>
+            <th>Type</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>soc</code></td>
+            <td>M1 Battery</td>
+            <td>float [0–1]</td>
+            <td>Current state of charge</td>
+          </tr>
+          <tr>
+            <td><code>soh</code></td>
+            <td>M1 Battery</td>
+            <td>float [0–1]</td>
+            <td>Battery degradation</td>
+          </tr>
+          <tr>
+            <td><code>cell_delta_mv</code></td>
+            <td>M1 Battery</td>
+            <td>float</td>
+            <td>Max cell voltage imbalance</td>
+          </tr>
+          <tr>
+            <td><code>battery_temp_c</code></td>
+            <td>M1 Battery</td>
+            <td>float</td>
+            <td>Pack temperature</td>
+          </tr>
+          <tr>
+            <td><code>ambient_temp_c</code></td>
+            <td>M2 Weather</td>
+            <td>float</td>
+            <td>Outside temperature</td>
+          </tr>
+          <tr>
+            <td><code>headwind_ms</code></td>
+            <td>M2 Weather</td>
+            <td>float</td>
+            <td>Wind resistance component</td>
+          </tr>
+          <tr>
+            <td><code>precipitation_mm</code></td>
+            <td>M2 Weather</td>
+            <td>float</td>
+            <td>Rain/snow intensity</td>
+          </tr>
+          <tr>
+            <td><code>avg_gradient_deg</code></td>
+            <td>M3 Topology</td>
+            <td>float</td>
+            <td>Mean route slope</td>
+          </tr>
+          <tr>
+            <td><code>elevation_gain_m</code></td>
+            <td>M3 Topology</td>
+            <td>float</td>
+            <td>Total climbing</td>
+          </tr>
+          <tr>
+            <td><code>regen_opportunity_pct</code></td>
+            <td>M3 Topology</td>
+            <td>float [0–100]</td>
+            <td>% of route that's downhill</td>
+          </tr>
+          <tr>
+            <td><code>cargo_mass_kg</code></td>
+            <td>User Input</td>
+            <td>float</td>
+            <td>Extra load beyond vehicle weight</td>
+          </tr>
+          <tr>
+            <td><code>passenger_count</code></td>
+            <td>User Input</td>
+            <td>int [1–5]</td>
+            <td>Number of occupants</td>
+          </tr>
+          <tr>
+            <td><code>driver_aggression</code></td>
+            <td>M5 Driver</td>
+            <td>float [0.5–2.0]</td>
+            <td>Learned driving style coefficient</td>
+          </tr>
+          <tr>
+            <td><code>hvac_usage</code></td>
+            <td>M5 Driver</td>
+            <td>float [0–1]</td>
+            <td>Heating/cooling usage pattern</td>
+          </tr>
+          <tr>
+            <td><code>avg_highway_speed</code></td>
+            <td>M5 Driver</td>
+            <td>float</td>
+            <td>Typical cruise speed</td>
+          </tr>
+          <tr>
+            <td><code>route_type</code></td>
+            <td>M3 Topology</td>
+            <td>categorical</td>
+            <td>Highway, urban, rural</td>
+          </tr>
+          <tr>
+            <td><code>time_of_day</code></td>
+            <td>System</td>
+            <td>float [0–24]</td>
+            <td>Hour of departure (traffic proxy)</td>
+          </tr>
+          <tr>
+            <td><code>physics_range_km</code></td>
+            <td>M4 Physics</td>
+            <td>float</td>
+            <td>The baseline prediction to correct</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p><strong>Categorical encoding:</strong> <code>route_type</code> is one-hot encoded (3 binary features).</p>
+    </div>
+  </div>
+
+  <div class="ml-block">
+    <div class="ml-block-title">Training Methodology — The Self-Learning Loop</div>
+    <div class="ml-block-body">
+      <p><strong>Initial State (Day 1):</strong> Model is untrained. XGBoost predicts residual = 0, so <code>Range_final = Range_physics</code>.</p>
+
+      <p><strong>After Each Trip:</strong></p>
+      <div class="training-pipeline">
+        <div class="pipeline-step">
+          <div class="pipeline-num">1</div>
+          <div class="pipeline-label">Pre-Trip</div>
+          <div class="pipeline-detail">M6 calls predictRange(). Physics + XGBoost produce estimate.</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+          <div class="pipeline-num">2</div>
+          <div class="pipeline-label">Trip Execution</div>
+          <div class="pipeline-detail">User drives. App logs actual energy used, actual km driven.</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+          <div class="pipeline-num">3</div>
+          <div class="pipeline-label">Compute Error</div>
+          <div class="pipeline-detail">ε = Range_actual − Range_predicted</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+          <div class="pipeline-num">4</div>
+          <div class="pipeline-label">Store Sample</div>
+          <div class="pipeline-detail">Save (features, ε) to local database (SQLite on-device).</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+          <div class="pipeline-num">5</div>
+          <div class="pipeline-label">Retrain</div>
+          <div class="pipeline-detail">Retrain XGBoost on all stored samples. Update model weights.</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+          <div class="pipeline-num">6</div>
+          <div class="pipeline-label">Better Next Time</div>
+          <div class="pipeline-detail">Next prediction uses improved model.</div>
+        </div>
+      </div>
+
+      <p><strong>Retraining Frequency:</strong> After every trip (incremental learning). XGBoost retraining on 50-100 samples takes ~200ms on a phone CPU.</p>
+
+      <p><strong>Data Storage (GDPR-compliant):</strong></p>
+      <ul>
+        <li>All trip data stored locally in SQLite database on device</li>
+        <li>NO personally identifiable information (no GPS tracks, no timestamps with location)</li>
+        <li>Only anonymised aggregate statistics: distance, energy, features, error</li>
+        <li>User can delete all data via M5.resetProfile()</li>
+        <li>Optional: user can opt-in to share anonymised samples to cloud for federated learning (improves global model)</li>
+      </ul>
+
+      <p><strong>Validation:</strong> 80/20 train/test split on stored samples. Monitor test set MAE (Mean Absolute Error) to detect overfitting.</p>
+    </div>
+  </div>
+
+  <div class="ml-block">
+    <div class="ml-block-title">Confidence Interval Estimation</div>
+    <div class="ml-block-body">
+      <p>Instead of predicting just the mean error, we train <strong>3 XGBoost models</strong>:</p>
+      <ul>
+        <li><strong>Model 1:</strong> Predicts 5th percentile residual (optimistic case)</li>
+        <li><strong>Model 2:</strong> Predicts 50th percentile residual (median case)</li>
+        <li><strong>Model 3:</strong> Predicts 95th percentile residual (pessimistic case)</li>
+      </ul>
+
+      <p>This is called <strong>Quantile Regression</strong>. XGBoost supports this natively with <code>objective='reg:quantileerror'</code>.</p>
+
+      <div class="formula-box">
+        <span class="var">Range_low</span> <span class="op">= Range_physics + Model1(features)</span><br>
+        <span class="var">Range_mean</span> <span class="op">= Range_physics + Model2(features)</span><br>
+        <span class="var">Range_high</span> <span class="op">= Range_physics + Model3(features)</span>
+      </div>
+
+      <p>UI displays: <strong>"280 km (250 – 310 km, 90% confident)"</strong></p>
+
+      <p>The width of the interval (310 − 250 = 60 km) tells the user how uncertain the prediction is. Wide interval = unfamiliar conditions (new route, extreme weather). Narrow interval = high confidence (familiar route, typical conditions).</p>
+    </div>
+  </div>
+
+  <div class="ml-block">
+    <div class="ml-block-title">Solving the "72km Tesla Problem" with ML</div>
+    <div class="ml-block-body">
+      <p>Recall the incident: Tesla showed 72 km remaining but suddenly shut down due to cell imbalance.</p>
+
+      <p><strong>Detection Logic (M6.detectCellImbalanceRisk):</strong></p>
+      <ul>
+        <li>Read <code>M1.getCellVoltageDelta()</code> and <code>M1.getThermalState()</code></li>
+        <li>If <code>cell_delta > 100 mV</code> AND <code>battery_temp < 0°C</code> → <strong>HIGH risk</strong></li>
+        <li>If <code>cell_delta > 150 mV</code> → <strong>CRITICAL risk</strong> (regardless of temp)</li>
+      </ul>
+
+      <p><strong>ML Enhancement:</strong> The XGBoost model learns that when <code>cell_delta</code> is high, the physics model overestimates range. It automatically applies a correction factor:</p>
+
+      <div class="formula-box">
+        if <span class="var">cell_delta</span> <span class="op">> 100 mV:</span><br>
+        &nbsp;&nbsp;<span class="var">correction</span> <span class="op">= −0.15 × Range_physics</span> <span class="op">(learned coefficient)</span><br>
+        &nbsp;&nbsp;<span class="var">Range_final</span> <span class="op">= Range_physics + correction</span>
+      </div>
+
+      <p>UI shows: <strong>⚠️ CRITICAL: Cell #7 imbalance detected. Displayed range may be unreliable. Charge immediately or risk sudden shutdown.</strong></p>
+
+      <p>This is an <em>actionable warning</em> — not just "low battery", but a specific diagnosis with a specific recommendation.</p>
+    </div>
+  </div>
+
+  <div class="ml-block">
+    <div class="ml-block-title">Implementation Notes</div>
+    <div class="ml-block-body">
+      <p><strong>Libraries:</strong></p>
+      <ul>
+        <li><strong>iOS:</strong> CoreML (convert XGBoost → .mlmodel), or coremltools Python package for on-device training</li>
+        <li><strong>Android:</strong> TensorFlow Lite (XGBoost → TFLite), or use xgboost4j-android library directly</li>
+        <li><strong>Cross-platform:</strong> React Native + ONNX Runtime Mobile (XGBoost → ONNX)</li>
+      </ul>
+
+      <p><strong>Model Export:</strong></p>
+      <code>xgboost_model.save_model('range_corrector.json')</code><br>
+      Then convert to platform-specific format (CoreML / TFLite / ONNX).
+
+      <p><strong>Retraining on-device:</strong> Use incremental learning. Don't retrain from scratch — just update existing trees with new samples. XGBoost's <code>xgb_model</code> parameter allows this.</p>
+
+      <p><strong>Placeholder Strategy (Early Development):</strong></p>
+      <ul>
+        <li>Start with physics-only (XGBoost returns 0)</li>
+        <li>Collect real trip data from test drives</li>
+        <li>Train initial model offline</li>
+        <li>Deploy pre-trained model with the app</li>
+        <li>Enable on-device retraining in production</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<div class="footer">
+  EV Range Predictor · Complete Module Specifications · Parnas Information Hiding + XGBoost ML
+</div>
+
+</body>
+</html>
