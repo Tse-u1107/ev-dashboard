@@ -1,0 +1,1 @@
+["soc", "soh", "cell_delta_mv", "battery_temp_c", "ambient_temp_c", "headwind_ms", "precipitation_mm", "avg_gradient_deg", "elevation_gain_m", "regen_opportunity_pct", "cargo_mass_kg", "passenger_count", "driver_aggression", "hvac_usage", "avg_highway_speed", "time_of_day", "route_type_highway", "route_type_urban", "route_type_rural"]
