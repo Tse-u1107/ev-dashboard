@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Switch, Text, View } from "react-native";
 import Slider from "@react-native-community/slider";
-import { colors, spacing, typography } from "../../theme";
+import { colors, spacing, typography, borderRadius } from "../../theme";
 
 function SliderRow({ label, valueText, min, max, step, value, onChange }) {
   return (
@@ -11,14 +11,15 @@ function SliderRow({ label, valueText, min, max, step, value, onChange }) {
         <Text style={styles.sliderValue}>{valueText}</Text>
       </View>
       <Slider
+        style={styles.slider}
         minimumValue={min}
         maximumValue={max}
         step={step}
         value={value}
         onValueChange={onChange}
-        minimumTrackTintColor={colors.primary}
-        maximumTrackTintColor={colors.border}
-        thumbTintColor={colors.secondary}
+        minimumTrackTintColor="#34d399"
+        maximumTrackTintColor="rgba(148, 163, 184, 0.35)"
+        thumbTintColor="#6ee7b7"
       />
     </View>
   );
@@ -91,18 +92,22 @@ const styles = StyleSheet.create({
   container: {
     marginTop: spacing.md,
     padding: spacing.md,
-    borderRadius: 12,
+    borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: "rgba(148, 163, 184, 0.24)",
+    backgroundColor: "rgba(15, 23, 42, 0.62)",
   },
   title: {
     ...typography.bodyBold,
-    color: colors.text,
+    color: "#f1f5f9",
     marginBottom: spacing.sm,
   },
   sliderRow: {
     marginTop: spacing.sm,
+  },
+  slider: {
+    height: 24,
+    transform: [{ scaleY: 0.78 }],
   },
   sliderHeader: {
     flexDirection: "row",
@@ -112,11 +117,11 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     ...typography.caption,
-    color: colors.text,
+    color: "rgba(226, 232, 240, 0.9)",
   },
   sliderValue: {
     ...typography.captionBold,
-    color: colors.primary,
+    color: "#86efac",
   },
   switchRow: {
     marginTop: spacing.md,

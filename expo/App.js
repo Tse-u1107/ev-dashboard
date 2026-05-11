@@ -12,20 +12,23 @@ import DetailsPage from './pages/details';
 import AuthPage from './pages/auth';
 import MapPage from "./pages/map";
 
+import { House, Map, Settings2 } from "lucide-react-native";
+
 import { colors, typography } from './theme';
 import { PlateauSelectionProvider } from "./context/PlateauSelectionContext";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function tabIcon(routeName) {
+function tabIcon(routeName, focused) {
+  const iconColor = focused ? colors.text : colors.textSecondary;
   if (routeName === "Home") {
-    return "🏠";
+    return <House size={16} color={iconColor} />;
   }
   if (routeName === "Map") {
-    return "🗺️";
+    return <Map size={16} color={iconColor} />;
   }
-  return "⚙️";
+  return <Settings2 size={16} color={iconColor} />;
 }
 
 function GlassTabBar({ state, descriptors, navigation }) {
@@ -42,7 +45,7 @@ function GlassTabBar({ state, descriptors, navigation }) {
               style={[styles.tabItem, focused ? styles.tabItemActive : null]}
               onPress={() => navigation.navigate(route.name)}
             >
-              <Text style={styles.tabIcon}>{tabIcon(route.name)}</Text>
+              <View style={styles.tabIcon}>{tabIcon(route.name, focused)}</View>
               <Text style={[styles.tabLabel, focused ? styles.tabLabelActive : null]}>
                 {label}
               </Text>

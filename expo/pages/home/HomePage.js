@@ -261,7 +261,7 @@ export default function HomePage({ navigation }) {
             </View>
             <View style={styles.confidenceLabels}>
               <Text style={styles.confidenceText}>{rangeData.low} km</Text>
-              <Text style={styles.confidenceTextCenter}>Crazy confidence band</Text>
+              {/* <Text style={styles.confidenceTextCenter}>Crazy confidence band</Text> */}
               <Text style={styles.confidenceText}>{rangeData.high} km</Text>
             </View>
           </View>
