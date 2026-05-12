@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Text,
   View,
+  Animated,
+  PanResponder
 } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { StatusBar } from "expo-status-bar";
@@ -39,6 +41,8 @@ import { usePlateauSelection } from "../../context/PlateauSelectionContext";
 
 const TILE_SIZE = 3;
 const CANVAS_SIZE = MAP_SIZE * TILE_SIZE;
+const SVG_PADDING = 20;
+const PADDED_CANVAS_SIZE = CANVAS_SIZE + SVG_PADDING * 2;
 const WEATHER_CARD_GAP = spacing.md;
 const STATUS_COLORS = {
   reachable: colors.success,
@@ -189,8 +193,8 @@ export default function MapPage() {
         cells.push(
           <Rect
             key={`${x}-${y}`}
-            x={x * TILE_SIZE}
-            y={(MAP_SIZE - 1 - y) * TILE_SIZE}
+            x={x * TILE_SIZE + SVG_PADDING}
+            y={(MAP_SIZE - 1 - y) * TILE_SIZE + SVG_PADDING}
             width={TILE_SIZE}
             height={TILE_SIZE}
             fill={rampColor(tempC, gridRange.minTemp, gridRange.maxTemp)}
@@ -204,6 +208,14 @@ export default function MapPage() {
   const selectedIndex = useMemo(
     () => Math.max(0, PLATEAU_NODES.findIndex((node) => node.id === selectedNodeId)),
     [selectedNodeId]
+  );
+  const toMapPercentX = useCallback(
+    (x) => `${((x * TILE_SIZE + SVG_PADDING) / PADDED_CANVAS_SIZE) * 100}%`,
+    []
+  );
+  const toMapPercentY = useCallback(
+    (y) => `${(((MAP_SIZE - y) * TILE_SIZE + SVG_PADDING) / PADDED_CANVAS_SIZE) * 100}%`,
+    []
   );
 
   useEffect(() => {
@@ -229,7 +241,7 @@ export default function MapPage() {
             <Svg
               width="100%"
               height="100%"
-              viewBox={`0 0 ${CANVAS_SIZE} ${CANVAS_SIZE}`}
+              viewBox={`0 0 ${PADDED_CANVAS_SIZE} ${PADDED_CANVAS_SIZE}`}
               style={styles.heatLayer}
             >
               {heatRects}
@@ -239,8 +251,8 @@ export default function MapPage() {
               style={[
                 styles.homeMarker,
                 {
-                  left: `${(HOME_BASE.x / MAP_SIZE) * 100}%`,
-                  top: `${((MAP_SIZE - HOME_BASE.y) / MAP_SIZE) * 100}%`,
+                  left: toMapPercentX(HOME_BASE.x),
+                  top: toMapPercentY(HOME_BASE.y),
                 },
               ]}
             >
@@ -257,8 +269,8 @@ export default function MapPage() {
                     styles.nodeMarker,
                     { backgroundColor: STATUS_COLORS[status] },
                     {
-                      left: `${(node.x / MAP_SIZE) * 100}%`,
-                      top: `${((MAP_SIZE - node.y) / MAP_SIZE) * 100}%`,
+                      left: toMapPercentX(node.x),
+                      top: toMapPercentY(node.y),
                     },
                     active ? styles.nodeMarkerActive : null,
                   ]}
@@ -448,8 +460,7 @@ const styles = StyleSheet.create({
   mapOverlayLegend: {
     position: "absolute",
     left: spacing.xs,
-    right: spacing.xs,
-    bottom: spacing.xs,
+    top: spacing.xs,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,

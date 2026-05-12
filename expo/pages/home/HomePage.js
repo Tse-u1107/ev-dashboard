@@ -18,8 +18,6 @@ import { getRecentTrips, initDb, savePlannedTrip } from '../../services/tripStor
 import { usePlateauSelection } from '../../context/PlateauSelectionContext';
 
 export default function HomePage({ navigation }) {
-  const [soc, setSoc] = useState('0.72');
-  const [aggression, setAggression] = useState('1.5');
   const [origin, setOrigin] = useState('Home Base');
   const [destination, setDestination] = useState('Pine Gate');
   const [plannedDistanceKm, setPlannedDistanceKm] = useState('1');
@@ -34,17 +32,18 @@ export default function HomePage({ navigation }) {
     distanceKm: selectedDistanceKm,
     ambientTempC,
     destinationWeather,
+    godModeState,
   } = usePlateauSelection();
 
   const parsedSoc = useMemo(() => {
-    const value = Number.parseFloat(soc);
+    const value = Number.parseFloat(`${godModeState.initialSoc}`);
     return Number.isFinite(value) ? value : DEFAULT_INPUT.soc;
-  }, [soc]);
+  }, [godModeState.initialSoc]);
 
   const parsedAgg = useMemo(() => {
-    const value = Number.parseFloat(aggression);
+    const value = Number.parseFloat(`${godModeState.driverAggression}`);
     return Number.isFinite(value) ? value : DEFAULT_INPUT.driver_aggression;
-  }, [aggression]);
+  }, [godModeState.driverAggression]);
 
   const latestTrip = recentTrips[0] ?? null;
 
@@ -83,7 +82,7 @@ export default function HomePage({ navigation }) {
     soc: parsedSoc,
     driver_aggression: parsedAgg,
     soh: 0.94,
-    temperature: 22,
+    temperature: ambientTempC.toFixed(2),
     cellDelta: 60,
   };
 
@@ -115,9 +114,8 @@ export default function HomePage({ navigation }) {
   }, []);
 
   const handlePredict = async () => {
-    const nextSoc = Number.parseFloat(soc);
-    if (!Number.isFinite(nextSoc)) {
-      setError('SOC must be a valid number (e.g. 0.85).');
+    if (!Number.isFinite(parsedSoc)) {
+      setError('SOC from map settings is invalid.');
       setResult(null);
       return;
     }
@@ -130,7 +128,7 @@ export default function HomePage({ navigation }) {
         ambient_temp_c: ambientTempC,
         headwind_ms: destinationWeather.windMs,
         precipitation_mm: destinationWeather.precipMm,
-        soc: nextSoc,
+        soc: parsedSoc,
         driver_aggression: parsedAgg,
       });
       setResult(prediction);
@@ -210,7 +208,14 @@ export default function HomePage({ navigation }) {
 
   useEffect(() => {
     void handlePredict();
-  }, [ambientTempC, destinationWeather.precipMm, destinationWeather.windMs]);
+  }, [
+    ambientTempC,
+    destinationWeather.precipMm,
+    destinationWeather.windMs,
+    parsedAgg,
+    parsedSoc,
+    selectedNode?.id,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -276,29 +281,9 @@ export default function HomePage({ navigation }) {
           ) : null}
 
           <View style={styles.predictRow}>
-            <TextInput
-              value={soc}
-              onChangeText={setSoc}
-              placeholder="SOC (e.g. 0.85)"
-              placeholderTextColor="rgba(255,255,255,0.55)"
-              keyboardType="decimal-pad"
-              style={styles.socInput}
-            />
-            <TextInput
-              value={aggression}
-              onChangeText={setAggression}
-              placeholder="Aggression (1.0)"
-              placeholderTextColor="rgba(255,255,255,0.55)"
-              keyboardType="decimal-pad"
-              style={styles.socInput}
-            />
-            <TouchableOpacity
-              style={[styles.predictButton, loading && styles.predictButtonDisabled]}
-              onPress={handlePredict}
-              disabled={loading}
-            >
-              <Text style={styles.predictButtonText}>Predict</Text>
-            </TouchableOpacity>
+            <Text style={styles.sourceInfoText}>
+              Auto-updated from Map settings | SOC {(parsedSoc * 100).toFixed(0)}% | Aggression {parsedAgg.toFixed(2)}
+            </Text>
           </View>
 
           {loading ? (
@@ -639,34 +624,22 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   predictRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginTop: spacing.md,
-  },
-  socInput: {
-    flex: 1,
-    height: 40,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    color: colors.surface,
-    marginRight: spacing.sm,
-  },
-  predictButton: {
-    height: 40,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.secondary,
-    paddingHorizontal: spacing.md,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
   },
+  sourceInfoText: {
+    ...typography.caption,
+    color: 'rgba(255,255,255,0.88)',
+  },
+  /*
+    Kept for plan-trip disabled state reuse.
+    The Predict button was removed and range updates are now automatic.
+  */
   predictButtonDisabled: {
     opacity: 0.6,
-  },
-  predictButtonText: {
-    ...typography.captionBold,
-    color: colors.surface,
   },
   loadingRow: {
     marginTop: spacing.sm,
